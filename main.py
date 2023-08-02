@@ -6,7 +6,7 @@ from gtts import lang
 from pydub import AudioSegment
 
 HOST = "127.0.0.1"
-PORT = 2121
+PORT = 4747
 net = {}
 
 CSGO_DIR = "C:/Program Files (x86)/Steam/steamapps/common/Counter-Strike Global Offensive/"
@@ -123,25 +123,29 @@ try:
                         if lang.lower() == msg.strip().lower():
                             return lang
 
+                def log(msg):
+                    print(msg)
+                    net.write(f"echo {msg}\n".encode())
+
                 if command == "#tr":
                     translate_to_chat(msg, self_lang_code)
                 elif command == "#gtr":
                     translate_to_chat(msg, self_lang_code, True)
                 elif command == "#tts":
                     text_to_speech(msg)
-                    print("generated tts")
+                    log("generated tts")
                 elif command == "#ttts":
-                    print("generated translated tts")
                     text_to_speech(msg, self_lang_code, True)
+                    log("generated translated tts")
                 elif command == "#lang":
                     self_lang_code = get_lang(msg)
-                    print(f"set language to {self_lang_code}")
+                    log(f"set language to {self_lang_code}")
                 elif command == "#olang":
                     other_lang_code = get_lang(msg)
-                    print(f"set language to {other_lang_code}")
+                    log(f"set language to {other_lang_code}")
                 elif command == "#langs":
-                    net.write("echo available languages\n".encode())
-                    net.write(f"echo {','.join(tts_list)}\n".encode())
+                    log("available languages - ")
+                    log(', '.join(tts_list))
 except ConnectionRefusedError:
     print(
         f'please start csgo with the following launch option: -netconport {PORT}')
