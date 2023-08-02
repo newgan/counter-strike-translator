@@ -6,22 +6,13 @@ from gtts import lang
 from pydub import AudioSegment
 
 HOST = "127.0.0.1"
-PORT = 4747
+PORT = 2121
 net = {}
 
 CSGO_DIR = "C:/Program Files (x86)/Steam/steamapps/common/Counter-Strike Global Offensive/"
 
-commands = [
-    "#gtr",
-    "#tr",
-    "#lang",
-    "#olang",
-    "#tts",
-    "#ttts",
-]
-
-lang_list = GoogleTranslator().get_supported_languages()
-voice_list = lang.tts_langs()
+# lang_list = GoogleTranslator().get_supported_languages()
+tts_list = lang.tts_langs()
 
 
 def translate(msg, lang_code):
@@ -55,7 +46,7 @@ def translate_to_console(msg, lang_code, author):
 
 
 def text_to_speech(msg, lang_code="en", should_translate=False):
-    if lang_code not in voice_list:
+    if lang_code not in tts_list:
         lang_code = "en"
 
     if should_translate:
@@ -66,8 +57,6 @@ def text_to_speech(msg, lang_code="en", should_translate=False):
 
     sound = AudioSegment.from_mp3(f'{CSGO_DIR}voice_input.mp3')
     sound.export(f'{CSGO_DIR}voice_input.wav', format="wav")
-
-    print("generated tts")
 
 
 def get_self_name():
@@ -94,9 +83,7 @@ try:
 {0} #ttts - TTS a translated message.                    ;
 {0} #lang - change language to translate to (self).      ;
 {0} #olang - change language to translate to (other).    ;
-{0}                                                      ;
-{0}                                                      ;
-{0}                                                      ;
+{0} #langs - print available languages to console        ;
 {0} -----------------------------------------------------;\n""".format("echo").encode())
 
         # workaround to ignore the header message
@@ -116,34 +103,45 @@ try:
             except:
                 continue
 
-            match = next((cmd for cmd in commands if (cmd in line)), None)
-            author = line.split(":", 1)[0]
+            message_split = line.split(" : ", 1)
+            if len(message_split) < 2:
+                continue
 
+            author = message_split[0].strip()
+            command = message_split[1].strip().split(" ")[0].strip()
             other_player_chat = " : " in line
             ignore = self in line
 
             if other_player_chat and not ignore:
                 translate_to_console(line.split(
                     " : ")[1], other_lang_code, author)
-            elif match:
-                msg = line.split(match, 1)[1]
+            elif command:
+                msg = line.split(command, 1)[1]
 
-                if match == "#tr":
+                def get_lang(msg):
+                    for lang in tts_list:
+                        if lang.lower() == msg.strip().lower():
+                            return lang
+
+                if command == "#tr":
                     translate_to_chat(msg, self_lang_code)
-                elif match == "#gtr":
+                elif command == "#gtr":
                     translate_to_chat(msg, self_lang_code, True)
-                elif match == "#tts":
+                elif command == "#tts":
                     text_to_speech(msg)
-                elif match == "#ttts":
+                    print("generated tts")
+                elif command == "#ttts":
+                    print("generated translated tts")
                     text_to_speech(msg, self_lang_code, True)
-                elif match == "#lang":
-                    for lang in voice_list:
-                        if lang.lower() == msg.strip().lower():
-                            self_lang_code = lang
-                elif match == "#olang":
-                    for lang in voice_list:
-                        if lang.lower() == msg.strip().lower():
-                            other_lang_code = lang
+                elif command == "#lang":
+                    self_lang_code = get_lang(msg)
+                    print(f"set language to {self_lang_code}")
+                elif command == "#olang":
+                    other_lang_code = get_lang(msg)
+                    print(f"set language to {other_lang_code}")
+                elif command == "#langs":
+                    net.write("echo available languages\n".encode())
+                    net.write(f"echo {','.join(tts_list)}\n".encode())
 except ConnectionRefusedError:
     print(
         f'please start csgo with the following launch option: -netconport {PORT}')
