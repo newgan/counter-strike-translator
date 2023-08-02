@@ -22,7 +22,6 @@ commands = [
 
 lang_list = GoogleTranslator().get_supported_languages()
 voice_list = lang.tts_langs()
-voice_list = [voice.lower() for voice in voice_list]
 
 
 def translate(msg, lang_code):
@@ -56,17 +55,19 @@ def translate_to_console(msg, lang_code, author):
 
 
 def text_to_speech(msg, lang_code="en", should_translate=False):
-    if should_translate:
-        msg = translate(msg, lang_code)
-
     if lang_code not in voice_list:
         lang_code = "en"
+
+    if should_translate:
+        msg = translate(msg, lang_code)
 
     tts = gTTS(msg, lang=lang_code)
     tts.save(f'{CSGO_DIR}voice_input.mp3')
 
     sound = AudioSegment.from_mp3(f'{CSGO_DIR}voice_input.mp3')
     sound.export(f'{CSGO_DIR}voice_input.wav', format="wav")
+
+    print("generated tts")
 
 
 def get_self_name():
@@ -136,9 +137,13 @@ try:
                 elif match == "#ttts":
                     text_to_speech(msg, self_lang_code, True)
                 elif match == "#lang":
-                    self_lang_code = msg.strip()
+                    for lang in voice_list:
+                        if lang.lower() == msg.strip().lower():
+                            self_lang_code = lang
                 elif match == "#olang":
-                    other_lang_code = msg.strip()
+                    for lang in voice_list:
+                        if lang.lower() == msg.strip().lower():
+                            other_lang_code = lang
 except ConnectionRefusedError:
     print(
         f'please start csgo with the following launch option: -netconport {PORT}')
