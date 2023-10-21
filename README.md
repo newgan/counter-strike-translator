@@ -1,6 +1,6 @@
 # counter-strike-translator
 
-simple tool to translate counter strike: global offensive chat with TTS support
+simple tool to translate counter strike: global offensive chat with TTS support   
 to use, add -netconport 4747 to the game's launch options
 
 - #gtr - send a translated message to global chat.
