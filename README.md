@@ -1,7 +1,7 @@
 # counter-strike-translator
 
 simple tool to translate counter strike: global offensive chat with TTS support   
-to use, add -netconport 4747 to the game's launch options
+to use, add -netconport 4747 to the game's launch options and make sure CSGO_DIR directs to your cs:go directory
 
 - #gtr - send a translated message to global chat.
 - #tr - send a translated message to team chat.
